@@ -18,9 +18,9 @@ business community: `Spring Boot` with its `GraalVM` native compilation and its 
 ![schéma d'architecture](docs/architecture.jpg)
 
 The microservices system is composed of 5 containers :
-- `worker`: the algorithm orchestrator
-- `rng`: the random number generator
-- `hasher`: the hasher processor
-- `redis`: the database recording each complete process cycle
-- `webui`: the web interface where system metrics are displayed
+- `worker`: the algorithm orchestrator [`Python`]
+- `rng`: the random number generator [`Spring Boot`]
+- `hasher`: the hasher processor [`Spring Boot`]
+- `redis`: the database recording each complete execution cycle
+- `webui`: the web interface where system metrics are displayed [`Python`]
 
