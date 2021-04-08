@@ -10,12 +10,14 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 @Configuration
 public class HasherRouter {
-
-    @Bean
-    public RouterFunction<ServerResponse> route(HasherHandler hasherHandler) {
-
-        return RouterFunctions.route()
-                .POST("/", RequestPredicates.contentType(MediaType.APPLICATION_OCTET_STREAM), hasherHandler::generate)
-                .build();
-    }
+  
+  @Bean
+  public RouterFunction<ServerResponse> route(HasherHandler hasherHandler) {
+    
+    return RouterFunctions.route()
+        .POST("/",
+            RequestPredicates.contentType(MediaType.APPLICATION_OCTET_STREAM),
+            hasherHandler::generate)
+        .build();
+  }
 }

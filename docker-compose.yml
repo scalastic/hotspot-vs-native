@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 
 services:
 
@@ -24,3 +24,5 @@ services:
 
   worker:
     build: worker
+    deploy:
+      replicas: 10

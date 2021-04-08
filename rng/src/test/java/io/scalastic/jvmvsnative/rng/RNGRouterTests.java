@@ -12,18 +12,17 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class RNGRouterTests {
-
-    @Autowired
-    private WebTestClient webTestClient;
-
-    @Test
-    public void testHello() {
-        webTestClient
-                .get().uri("/")
-                .accept(MediaType.TEXT_PLAIN)
-                .exchange()
-                // and use the dedicated DSL to test assertions against the response
-                .expectStatus().isOk()
-                .expectBody(String.class).isEqualTo("Hello");
-    }
+  
+  @Autowired
+  private WebTestClient webTestClient;
+  
+  @Test
+  public void route() {
+    webTestClient
+        .get().uri("/")
+        .accept(MediaType.TEXT_PLAIN)
+        .exchange()
+        // dedicated DSL to test assertions against the response
+        .expectStatus().isOk();
+  }
 }

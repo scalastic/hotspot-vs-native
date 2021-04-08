@@ -6,12 +6,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 public class HasherHandlerTests {
-
-    @Autowired
-    HasherHandler hasherHandler;
-
-    @Test
-    void hash() {
-
-    }
+  
+  @Autowired
+  HasherHandler hasherHandler;
+  
+  @Test
+  void generate() {
+    // @TODO
+  }
 }

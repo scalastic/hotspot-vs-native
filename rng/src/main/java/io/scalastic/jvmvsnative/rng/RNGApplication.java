@@ -1,17 +1,17 @@
-package io.scalastic.jvmvsnative.hasher;
+package io.scalastic.jvmvsnative.rng;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class HasherApplication {
+public class RNGApplication {
   
   public static void main(String[] args) {
     
-    SpringApplication.run(HasherApplication.class, args);
+    SpringApplication.run(RNGApplication.class, args);
     
-    HasherWebClient hwc = new HasherWebClient();
-    hwc.getResult();
+    RNGWebClient gwc = new RNGWebClient();
+    gwc.getResult();
   }
   
 }

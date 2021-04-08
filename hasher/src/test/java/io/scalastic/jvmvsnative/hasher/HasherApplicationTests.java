@@ -5,9 +5,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class HasherApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
+  
+  @Test
+  void contextLoads() {
+    //@TODO
+  }
+  
 }

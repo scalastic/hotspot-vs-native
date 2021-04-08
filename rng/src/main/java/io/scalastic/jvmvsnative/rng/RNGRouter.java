@@ -10,12 +10,14 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 @Configuration
 public class RNGRouter {
-
-    @Bean
-    public RouterFunction<ServerResponse> route(RNGHandler rngHandler) {
-
-        return RouterFunctions
-                .route(RequestPredicates.GET("/")
-                        .and(RequestPredicates.accept(MediaType.TEXT_PLAIN)), rngHandler::rng);
-    }
+  
+  @Bean
+  public RouterFunction<ServerResponse> route(RNGHandler rngHandler) {
+    
+    return RouterFunctions.route()
+        .GET("/",
+            RequestPredicates.accept(MediaType.TEXT_PLAIN),
+            rngHandler::rng)
+        .build();
+  }
 }
