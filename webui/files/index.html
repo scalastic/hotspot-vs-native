@@ -50,13 +50,6 @@ function refresh () {
             points.push({ x: s2.now, y: speed });
         }
         $("#speed").text("~" + speed.toFixed(1) + " hashes/second");
-        var msg = ("I'm attending a @docker orchestration workshop, "
-                   + "and my #DockerCoins mining rig is crunching "
-                   + speed.toFixed(1) + " hashes/second! W00T!");
-        $("#tweet").attr(
-            "href",
-            "https://twitter.com/intent/tweet?text="+encodeURIComponent(msg)
-        );
         if (graph == null) {
             graph = new Rickshaw.Graph({
                 renderer: "area",
@@ -102,9 +95,8 @@ $(function () {
 <div id="graph"></div>
 
 <h2>
-  Current mining speed:
+  Current app cycle speed:
   <span id="speed">-</span>
-  <a id="tweet" href="#">(Tweet this!)</a>
 </h2>
 
 </body>

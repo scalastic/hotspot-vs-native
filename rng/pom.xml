@@ -63,6 +63,10 @@
                 <groupId>org.springframework.experimental</groupId>
                 <artifactId>spring-aot-maven-plugin</artifactId>
                 <version>${spring-native.version}</version>
+                <configuration>
+                    <removeYamlSupport>true</removeYamlSupport>
+                    <removeSpelSupport>true</removeSpelSupport>
+                </configuration>
                 <executions>
                     <execution>
                         <id>test-generate</id>
