@@ -3,20 +3,16 @@ version: "3"
 services:
 
   rng:
-    image: docker.io/library/rng-hotspot:0.0.1-SNAPSHOT
+    image: rng-hotspot:0.0.1-SNAPSHOT
     build:
       context: ./rng
       dockerfile: ./Dockerfile.hotspot
-    ports:
-    - "8080:8080"
 
   hasher:
-    image: docker.io/library/hasher-hotspot:0.0.1-SNAPSHOT
+    image: hasher-hotspot:0.0.1-SNAPSHOT
     build:
       context: ./hasher
-      dockerfile: Dockerfile.hotspot
-    ports:
-    - "8090:8080"
+      dockerfile: ./Dockerfile.hotspot
 
   webui:
     build: webui
@@ -30,5 +26,3 @@ services:
 
   worker:
     build: worker
-    deploy:
-      replicas: 1
