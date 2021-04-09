@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+
+  rng:
+    image: docker.io/library/rng-hotspot:0.0.1-SNAPSHOT
+    build:
+      context: ./rng
+      dockerfile: ./Dockerfile.hotspot
+    ports:
+    - "8080:8080"
+
+  hasher:
+    image: docker.io/library/hasher-hotspot:0.0.1-SNAPSHOT
+    build:
+      context: ./hasher
+      dockerfile: Dockerfile.hotspot
+    ports:
+    - "8090:8080"
+
+  webui:
+    build: webui
+    ports:
+    - "80:80"
+    volumes:
+    - "./webui/files/:/files/"
+
+  redis:
+    image: redis:6.2.1
+
+  worker:
+    build: worker
+    deploy:
+      replicas: 1
