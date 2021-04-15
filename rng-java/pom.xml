@@ -9,12 +9,12 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.scalastic.jvmvsnative</groupId>
-    <artifactId>hasher</artifactId>
+    <artifactId>rng</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Hasher</name>
+    <name>Random Number Generator</name>
     <description>Demo project for Spring Boot</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
         <spring-native.version>0.9.1</spring-native.version>
     </properties>
     <dependencies>
@@ -42,16 +42,6 @@
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -62,9 +52,9 @@
                 <configuration>
                     <image>
                         <builder>paketobuildpacks/builder:tiny</builder>
+                        <name>${project.artifactId}-native:${project.version}</name>
                         <env>
                             <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-                            <BP_NATIVE_IMAGES_ARGS>--verbose</BP_NATIVE_IMAGES_ARGS>
                         </env>
                     </image>
                 </configuration>
@@ -94,18 +84,34 @@
             </plugin>
         </plugins>
     </build>
+
     <repositories>
         <repository>
-            <id>spring-releases</id>
-            <name>Spring Releases</name>
+            <id>spring-snapshot</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>spring-release</id>
+            <name>Spring release</name>
             <url>https://repo.spring.io/release</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
+
     <pluginRepositories>
         <pluginRepository>
-            <id>spring-releases</id>
-            <name>Spring Releases</name>
+            <name>Spring release</name>
+            <id>release</id>
             <url>https://repo.spring.io/release</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </pluginRepository>
     </pluginRepositories>
 

@@ -5,18 +5,18 @@ services:
   rng:
     image: rng-hotspot:0.0.1
     build:
-      context: ./rng
+      context: ./rng-java
       dockerfile: ./Dockerfile.hotspot
 
   hasher:
     image: hasher-hotspot:0.0.1
     build:
-      context: ./hasher
+      context: ./hasher-java
       dockerfile: ./Dockerfile.hotspot
 
   webui:
     build: webui
-    image: webui-hotspot:0.0.1
+    image: webui-regular:0.0.1
     ports:
     - "80:80"
     volumes:
@@ -27,5 +27,6 @@ services:
 
   worker:
     build: worker
-    image: worker-hotspot:0.0.1
-
+    image: worker-regular:0.0.1
+    deploy:
+      replicas: 10

@@ -12,7 +12,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/json', function (req, res) {
-    client.hlen('wallet', function (err, coins) {
+    client.hlen('vault', function (err, coins) {
         client.get('hashes', function (err, hashes) {
             var now = Date.now() / 1000;
             res.json( {

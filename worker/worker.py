@@ -50,12 +50,12 @@ def work_once():
     random_bytes = get_random_bytes()
     hex_hash = hash_bytes(random_bytes)
     if not hex_hash.startswith('0'):
-        log.debug("No coin found")
+        log.debug("No hash found")
         return
-    log.info("Coin found: {}...".format(hex_hash[:8]))
-    created = redis.hset("wallet", hex_hash, random_bytes)
+    log.info("Hash found: {}...".format(hex_hash[:8]))
+    created = redis.hset("vault", hex_hash, random_bytes)
     if not created:
-        log.info("We already had that coin")
+        log.info("We already had that hash")
 
 
 if __name__ == "__main__":

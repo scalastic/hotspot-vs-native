@@ -1,19 +1,18 @@
-version: "3"
+version: "3.5"
 
 services:
 
   rng:
-    image: docker.io/library/rng:0.0.1-SNAPSHOT
+    image: rng-native:0.0.1-SNAPSHOT
     ports:
-    - "8080:8080"
+      - "8080:8080"
 
   hasher:
-    image: docker.io/library/hasher:0.0.1-SNAPSHOT
-    ports:
-    - "8090:8080"
+    image: hasher-native:0.0.1-SNAPSHOT
 
   webui:
     build: webui
+    image: webui-regular:0.0.1
     ports:
     - "80:80"
     volumes:
@@ -24,5 +23,6 @@ services:
 
   worker:
     build: worker
+    image: worker-regular:0.0.1
     deploy:
       replicas: 10

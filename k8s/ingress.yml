@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: webui
+spec:
+  #tls:
+  #- secretName: whatever.A.B.C.D.nip.io
+  #  hosts:
+  #  - whatever.A.B.C.D.nip.io
+  rules:
+    - host: webui
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: webui
+              servicePort: 80
