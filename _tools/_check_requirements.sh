@@ -20,10 +20,10 @@ fi
 
 if [[ "$_java" ]]; then
     version=$("$_java" -version 2>&1 | head -1 | cut -d'"' -f2 | sed '/^1\./s///' | cut -d'.' -f1)
-    if [[ "$version" == "11" ]]; then
+    if [[ "$version" == "8" ]]; then
         printf "Found Java version ${version} ✅\n"
     else
-        printf "${RED}FAILURE${NC}: Found Java version ${version} but should be 11! 🔥\n"
+        printf "${RED}FAILURE${NC}: Found Java version ${version} but should be 8! 🔥\n"
         exit 1;
     fi
 fi
@@ -37,13 +37,6 @@ else
   exit 1;
 fi
 
-if [[ -x $(type -p docker-compose) ]]; then
-  printf "Found Docker-compose command ✅\n"
-else
-  printf "${RED}FAILURE${NC}: Can't find docker-compose command! 🔥\n"
-  exit 1;
-fi
-
 ### Check Maven ###
 
 if [[ -x $(type -p mvn) ]]; then
@@ -51,3 +44,6 @@ if [[ -x $(type -p mvn) ]]; then
 else
   printf "No Maven command found : we'll use Maven Wrapper instead ✅\n"
 fi
+
+### Final
+printf "Check complete ✅\n\n"

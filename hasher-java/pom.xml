@@ -11,7 +11,7 @@
     </parent>
     <groupId>io.scalastic.jvmvsnative</groupId>
     <artifactId>hasher</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>Hasher</name>
     <description>Demo project for Spring Boot</description>
     <properties>
@@ -47,11 +47,6 @@
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
