@@ -1,9 +1,16 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+spec:
+  finalizers:
+    - kubernetes
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hasher
-  namespace: demo-app
+  namespace: demo
   labels:
     app: hasher
 spec:
@@ -40,7 +47,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: hasher
-  namespace: demo-app
+  namespace: demo
   labels:
     app: hasher
   annotations:
@@ -60,7 +67,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rng
-  namespace: demo-app
+  namespace: demo
   labels:
     app: rng
 spec:
@@ -97,7 +104,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rng
-  namespace: demo-app
+  namespace: demo
   labels:
     app: rng
   annotations:
@@ -117,7 +124,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: demo-app
+  namespace: demo
   labels:
     app: redis
 spec:
@@ -138,7 +145,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: demo-app
+  namespace: demo
   labels:
     app: redis
 spec:
@@ -153,7 +160,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: webui
-  namespace: demo-app
+  namespace: demo
   labels:
     app: webui
 spec:
@@ -190,7 +197,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: webui
-  namespace: demo-app
+  namespace: demo
   labels:
     app: webui
 spec:
@@ -208,7 +215,7 @@ metadata:
   labels:
     app: worker
   name: worker
-  namespace: demo-app
+  namespace: demo
 spec:
   replicas: 1
   selector:
