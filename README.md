@@ -42,7 +42,7 @@ The resulting microservices system is composed of 5 containers :
 - `rng`: the random number generator [`Spring Boot`]
 - `hasher`: the hasher processor [`Spring Boot`]
 - `redis`: the database recording each complete execution cycle
-- `webui`: the web interface where number of complete cycles is rendered [`Python`]
+- `webui`: the web interface where number of complete cycles is rendered [`JavaScript`]
 
 ## Requirements
 
@@ -146,16 +146,21 @@ Remember the microservices architecture :
 
 1. First, we want to manage the number of ~~containers~~ - pods in this case -  per microservice . We could want to 
    scale up automatically this number depending on metrics. We also would like to change the image of the pod, passing 
-   from a JVM image to a native image without the need to restart from scratch... Such Kubernetes resource already exists: [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+   from a JVM image to a native image without the need to restart from scratch... Such Kubernetes resource already 
+   exists: [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 
-2. Second, we want our microservices to communicate each others in the Kubernetes cluster. That's the job of [Service](https://kubernetes.io/docs/concepts/services-networking/).
+2. Second, we want our microservices to communicate each others in the Kubernetes cluster. That's the job of 
+   [Service](https://kubernetes.io/docs/concepts/services-networking/).
 
-3. We want to access to the web UI from outside the cluster: [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport) should be sufficient.
+3. We want to access the web UI from outside the cluster: 
+   [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport) would be sufficient.
 
-4. The Redis database does not need to be reached from the outside but only from the inside: that's already done by [ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/) which is the default Service type in Kubernetes.
+4. The Redis database does not need to be reached from the outside but only from the inside: that's already done by 
+   [ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/) which is the default Service type in Kubernetes.
 
 
-And I forgot the specific monitoring definition for the two Spring Boot microsercices... Well, it should be done in Service/metadata/annotations.
+And I forgot the specific monitoring definition for the two Spring Boot microsercices... Well, it should be done 
+in Service/metadata/annotations.
 
 
 Have a look at the `_kube/k8s-app-jvm.yml`.
@@ -169,7 +174,7 @@ Execute the command:
 kubectl apply -f _kube/k8s-app-jvm.yml
 ```
 
-Connect to the Web UI interface `http://localhost:@TODO`
+Connect to the Web UI interface [http://localhost/](http://localhost/)
 
 You should see the worker resulting process:
 
