@@ -18,6 +18,8 @@
 > 5. Note the time to stabilize the system, and the effectiveness of the process (cycles/sec)
 > 
 > See https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment
+
+---
 ## Introduction
 When it comes to comparing JVM-HotSpot and GraalVM-native executions, 
 it is often hard to decide on application's architecture and technology to test and even what to mesure.
@@ -33,6 +35,8 @@ into more realistic ones in enterprise ecosystem (and also more JVM-friendly): `
 and reactive `WebFlux`.
 
 Compiling these apps into JVM-based or Native images would make a good case study for this purpose.
+
+---
 ## Microservices Architecture
 
 ![Microservices Architecture](_img/architecture.jpg)
@@ -44,6 +48,7 @@ The resulting microservices system is composed of 5 containers :
 - `redis`: the database recording each complete execution cycle
 - `webui`: the web interface where number of complete cycles is rendered [`JavaScript`]
 
+---
 ## Requirements
 
 - In order to ***build*** the app, you'll need to install :
@@ -57,6 +62,7 @@ The resulting microservices system is composed of 5 containers :
   - If you only want to ***run*** the app, you'd just need [Docker](https://www.docker.com/products/docker-desktop) as 
     images were pulled on Docker Hub and are publicly accessible.
 
+---
 ## How-to build
 
 The goal of these builds is to produce Docker images, one per microservice. However, the Java-based ones will be build 
@@ -99,8 +105,8 @@ mvn spring-boot:build-image
 ### Expected result
 
 At least, you should now see your images in your local registry:
-```
-> docker images
+``` bash
+$ docker images
 REPOSITORY                TAG        IMAGE ID       CREATED             SIZE
 rng-jvm                   1.0.0      93de422df5d5   58 minutes ago      310MB
 hasher-jvm                1.0.0      d83f93c156de   About an hour ago   310MB
@@ -125,61 +131,97 @@ hasher-native             1.0.0      c89096e7fb46   41 years ago        80.6MB
 
 I've pulled this stuf into a public registry on Docker Hub so you don't even need to worry about these builds.
 
-## Let's play now
+---
+## Demo time
 
-This is the demo part. Because this application is microservices-based, we are going to play with the number of containers for each microservice.
+### Objectives
 
-For that, we need a ***Kubernetes cluster***... and ***Prometheus***, ***Grafana***... and **metrics** coming from our microservices to monitor the app!!
+@TODO => The main goal is to tune the application's components and see how they reacts.
+
+What are our levers for action? 
+- Because this application is microservices-based, we could easily play with the **number of containers** running each 
+  microservice.
+- For two of this microservices (*the Java ones*), there are two types of build we could switch: **JVM-based** or **Native**.
+
+Good! Let's do it.
+
+### Requirements
+For that, we need a ***Kubernetes cluster***... and ***Prometheus***, ***Grafana***... and **metrics** coming from our
+microservices to monitor the app...
 
 Well, no problem:
-- Thanks to ***Spring Boot*** and ***Micrometer***, the JVM and native versions of the app already expose metrics to Prometheus.
-- For the complete Kubernetes stack, there's also this previous article with all explained and scripted: [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/) 
+- Thanks to ***Spring Boot*** and ***Micrometer***, the Java applications (JVM and native-based) already expose metrics to Prometheus.
+- For a complete Kubernetes stack, you can follow this previous article with all explained and scripted: [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/) 
 
-### First start
+---
+## First run
 
-#### Kubernetes configuration
+First, we need to define the kubernetes configuration of our application.
+
+### Configure Kubernetes
 
 Let's have a look at how to set up these microservices into our kubernetes cluster.
 
 Remember the microservices architecture :
 ![Microservices Architecture](_img/architecture.jpg)
 
-1. First, we want to manage the number of ~~containers~~ - pods in this case -  per microservice . We could want to 
+1. We want to manage the number of ~~containers~~ - pods in this case -  per microservice . We could want to 
    scale up automatically this number depending on metrics. We also would like to change the image of the pod, passing 
    from a JVM image to a native image without the need to restart from scratch... Such Kubernetes resource already 
    exists: [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 
-2. Second, we want our microservices to communicate each others in the Kubernetes cluster. That's the job of 
-   [Service](https://kubernetes.io/docs/concepts/services-networking/).
+2. We want our microservices to communicate each others in the Kubernetes cluster. That's the job of 
+   [Service](https://kubernetes.io/docs/concepts/services-networking/) resource.
 
-3. We want to access the web UI from outside the cluster: 
-   [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport) would be sufficient.
+3. We'd like to access the web UI from outside the cluster: a Service typed with
+   [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport) resource would be sufficient.
 
 4. The Redis database does not need to be reached from the outside but only from the inside: that's already done by 
-   [ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/) which is the default Service type in Kubernetes.
+   [ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/) which is the default Service type in 
+   Kubernetes.
+5. We also want to monitor the application's metrics on Grafana via Prometheus: [found these good detailed explanations](https://developer.ibm.com/technologies/containers/tutorials/monitoring-kubernetes-prometheus/)
 
-
-And I forgot the specific monitoring definition for the two Spring Boot microsercices... Well, it should be done 
-in Service/metadata/annotations.
-
-
-Have a look at the `_kube/k8s-app-jvm.yml`.
+Have a look at the [_kube/k8s-app-jvm.yml](_kube/k8s-app-jvm.yml) file which contains these resources' configurations.
 
 #### Start the app
 
-In the first place, we start the app with one pod per microservice and the JVM-based for those based on Java langage.
+In the first place, all microservices' replicas are configured with 1 pod, and the Java-based microservices run on JVM.
 
-Execute the command:
-```
+- To start all microservices, apply this configuration to our cluster:
+``` bash
 kubectl apply -f _kube/k8s-app-jvm.yml
 ```
 
-Connect to the Web UI interface [http://localhost/](http://localhost/)
+- Connect to the Web UI interface:
+  
+But, hey, we don't know its address! That's right but we could guess what it is...
+    
+1. It is exposed as a NodePort in the `demo` namespace
+1. We only defined one NodePort in this namespace
+1. Our local kubernetes cluster is accessible via `localhost`
 
-You should see the worker resulting process:
+Let's run a query to build this URL:
+``` bash
+kubectl get service -n demo -o go-template='{{range .items}}{{range.spec.ports}}{{if .nodePort}}http://localhost:{{.nodePort}}{{"\n"}}{{end}}{{end}}{{end}}'
+```
+
+I get :
+``` bash
+$ kubectl get service -n demo -o go-template='{{range .items}}{{range.spec.ports}}{{if .nodePort}}http://localhost:{{.nodePort}}{{"\n"}}{{end}}{{end}}{{end}}'
+http://localhost:31698
+```
+
+Bingo! Enter ***THE_ONE_YOU_FOUND!!*** in a browser and you should see:
 
 ![The Web UI interface at startup](_img/webui-at-startup.png)
 
+> info "Note"
+> 
+> If the graph is still empty, that should be your microservices that are not all deployed and ready: wait...
+
+
+
+---
 ## Based on
 
-- Jérôme Patazzoni's `container-training` : [https://github.com/jpetazzo/container.training](https://github.com/jpetazzo/container.training)
+- Jérôme Patazzoni's `container-training`: [https://github.com/jpetazzo/container.training](https://github.com/jpetazzo/container.training)
