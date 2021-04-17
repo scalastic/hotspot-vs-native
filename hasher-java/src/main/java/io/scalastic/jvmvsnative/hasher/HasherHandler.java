@@ -26,6 +26,7 @@ public class HasherHandler {
   public Mono<ServerResponse> generate(ServerRequest request) {
     
     metricHasher.increment();
+    
     return request.bodyToMono(String.class)
         .flatMap(data -> ServerResponse.ok()
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
