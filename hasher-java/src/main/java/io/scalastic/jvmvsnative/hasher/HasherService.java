@@ -14,11 +14,11 @@ public class HasherService {
     if (digits.isEmpty()) {
       throw new IllegalArgumentException("digits must not be empty");
     }
-    
     final MessageDigest digest;
     try {
+      Thread.sleep(100);
       digest = MessageDigest.getInstance("SHA-1");
-    } catch (NoSuchAlgorithmException e) {
+    } catch (NoSuchAlgorithmException | InterruptedException e) {
       throw new RuntimeException(e.getMessage());
     }
     final byte[] hashbytes = digest.digest(digits.getBytes(StandardCharsets.UTF_8));
