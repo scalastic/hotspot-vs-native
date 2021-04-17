@@ -136,7 +136,8 @@ I've pulled this stuf into a public registry on Docker Hub so you don't even nee
 
 ### Objectives
 
-@TODO => The main goal is to tune the application's components and see how they reacts.
+The main goal of this demo is to tweak the microservices' resources configuration and see how it affects the global 
+application's performance. 
 
 What are our levers for action? 
 - Because this application is microservices-based, we could easily play with the **number of containers** running each 
@@ -154,7 +155,7 @@ Well, no problem:
 - For a complete Kubernetes stack, you can follow this previous article with all explained and scripted: [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/) 
 
 ---
-## First run
+## First start
 
 First, we need to define the kubernetes configuration of our application.
 
@@ -181,7 +182,72 @@ Remember the microservices architecture :
    Kubernetes.
 5. We also want to monitor the application's metrics on Grafana via Prometheus: [found these good detailed explanations](https://developer.ibm.com/technologies/containers/tutorials/monitoring-kubernetes-prometheus/)
 
-Have a look at the [_kube/k8s-app-jvm.yml](_kube/k8s-app-jvm.yml) file which contains these resources' configurations.
+Have a look at the `_kube/k8s-app-jvm.yml` extract showing the Hasher Java microservice resources' configuration:
+
+<details>
+<summary>_kube/k8s-app-jvm.yml extract</summary>
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hasher
+  namespace: demo
+  labels:
+    app: hasher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hasher
+  template:
+    metadata:
+      name: hasher
+      labels:
+        app: hasher
+    spec:
+      containers:
+        - image: hasher-jvm:1.0.0
+          imagePullPolicy: IfNotPresent
+          name: hasher
+          ports:
+            - containerPort: 8080
+              name: http-hasher
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hasher
+  namespace: demo
+  labels:
+    app: hasher
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/scheme: http
+    prometheus.io/path: /actuator/prometheus
+    prometheus.io/port: '8080'
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: http-hasher
+  selector:
+    app: hasher
+```
+
+</details>
+
 
 #### Start the app
 
@@ -213,11 +279,70 @@ http://localhost:31698
 
 Bingo! Enter ***THE_ONE_YOU_FOUND!!*** in a browser and you should see:
 
-![The Web UI interface at startup](_img/webui-at-startup.png)
+![The Web UI interface at startup](_img/jvm-with-1-worker.png)
 
 > info "Note"
 > 
 > If the graph is still empty, that should be your microservices that are not all deployed and ready: wait...
+
+---
+
+## Play with pods' number
+
+1. Update number with command line
+
+- Find deployments we want to scale:
+``` bash
+$ kubectl get deployment -n demo
+
+NAME     READY   UP-TO-DATE   AVAILABLE   AGE
+hasher   1/1     1            1           13m
+redis    1/1     1            1           13m
+rng      1/1     1            1           13m
+webui    1/1     1            1           13m
+worker   1/1     1            1           13m
+```
+
+- Try scaling `worker`: 
+
+``` bash
+$ kubectl scale deployment worker --replicas=2 -n demo
+
+deployment.apps/worker scaled
+```
+
+You notice an increase in 2 times for the hashes process on the graph too.
+
+- Let's try increasing to 10 workers then:
+
+``` bash
+$ kubectl scale deployment worker --replicas=10 -n demo
+```
+
+![The Web UI interface at startup](_img/jvm-with-10-worker.png)
+
+The process grows up but does not reach 10 times: the others microservices simply do not follow.
+
+-  Let's increase `hasher` and `rng`: 
+
+``` bash
+$ kubectl scale deployment hasher rng --replicas=2 -n demo
+```
+    
+@TODO: need grafana visualization of hasher and rng rate calls to explain what's happen
+
+@TODO: Also limit resources CPU and RAM request
+
+> info "Note"
+> 
+> Update replicas automatically with HPA & custom metrics
+> See https://itnext.io/horizontal-pod-autoscale-with-custom-metrics-8cb13e9d475
+
+---
+
+## Play with images
+
+@TODO https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment
 
 
 
