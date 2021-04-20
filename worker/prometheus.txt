@@ -1,0 +1,10 @@
+# Prometheus query for Worker
+
+- irate(hasher_requests_number{app="worker"}[1m]) : instant rate of hasher calls.
+- irate(hasher_request_processing_seconds_sum{app="worker"}[1m])
+
+- one or more worker : `sum(irate(rng_requests_number{app="worker"}[1m]))`
+
+sum(irate(redis_requests_number{app="worker"}[1m]))
+
+sum(container_cpu_usage_seconds_total{namespace="demo", pod=~"rng.*", container="POD"})

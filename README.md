@@ -328,6 +328,16 @@ The process grows up but does not reach 10 times: the others microservices simpl
 ``` bash
 $ kubectl scale deployment hasher rng --replicas=2 -n demo
 ```
+
+- Replace jvm-based images with native ones:
+```
+$ kubectl set image deployment/hasher hasher-native:1.0.0 --record
+```
+
+- Watch the deployment rollout:
+```
+$ kubectl rollout status deployment/hasher
+```
     
 @TODO: need grafana visualization of hasher and rng rate calls to explain what's happen
 
