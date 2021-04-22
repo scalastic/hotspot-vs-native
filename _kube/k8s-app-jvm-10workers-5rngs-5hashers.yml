@@ -14,7 +14,7 @@ metadata:
   labels:
     app: hasher
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: hasher
@@ -71,7 +71,7 @@ metadata:
   labels:
     app: rng
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: rng
@@ -159,65 +159,12 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webui
-  namespace: demo
-  labels:
-    app: webui
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: webui
-  template:
-    metadata:
-      name: webui
-      labels:
-        app: webui
-    spec:
-      containers:
-        - image: webui-js:1.0.0
-          imagePullPolicy: IfNotPresent
-          name: webui
-          ports:
-            - containerPort: 80
-              name: http-webui
-              protocol: TCP
-          readinessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /
-              port: 80
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 30
-            successThreshold: 1
-            timeoutSeconds: 2
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: webui
-  namespace: demo
-  labels:
-    app: webui
-spec:
-  ports:
-    - port: 80
-      protocol: TCP
-      targetPort: http-webui
-  selector:
-    app: webui
-  type: NodePort
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   labels:
     app: worker
   name: worker
   namespace: demo
 spec:
-  replicas: 1
+  replicas: 10
   selector:
     matchLabels:
       app: worker

@@ -1,25 +1,5 @@
 # HotSpot vs Native : an effective comparison of performances
 
-
-> WORK IN PROGRESS
-> 
-> @TODO
-> - ~~Docker compose is not necessary~~
-> - ~~Script Native build~~
-> - ~~Deploy on K8S~~
-> - ~~Implement and test monitoring tool on native apps : target micrometer/prometheus~~
-
-> Performances Comparison Scenario
-> 0. Build jvm-based and Native-based images
-> 1. Start apps with JVM-based images (for hasher and rng defined with Deployments k8s objects)
-> 2. Scale up number of replicas for each deployment above
-> 3. Note the time to stabilize the system, and the effectiveness of the process (cycles/sec)
-> 4. Update the image of deployments to Native-based image (for hasher and rng)
-> 5. Note the time to stabilize the system, and the effectiveness of the process (cycles/sec)
-> 
-> See https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment
-
----
 ## Introduction
 When it comes to comparing JVM-HotSpot and GraalVM-native executions, 
 it is often hard to decide on application's architecture and technology to test and even what to measure.
@@ -30,11 +10,12 @@ a microservices mesh and measuring the number of completed cycles per second pro
 system effectiveness. Being able to play with the number of running containers would be also a good illustration of what 
 actually happens.
 
-I therefore decided to port his demonstration application into Java using `Spring Boot` and reactive programming `WebFlux`.
+Actively following `Spring Native` developments, I therefore decided to port his demonstration application into Java using
+the latest development versions of `Spring Boot` and reactive programming `WebFlux`.
 
 ---
 
-## Demonstration
+## The demo
 
 ### Objective
 
@@ -63,6 +44,13 @@ Well it's not a big deal and this already exists:
 - I explained and scripted a complete Kubernetes stack installation in a previous article: [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/)
 - ***Spring Boot Native*** can build natively or in Bytecode any Java app
 
+> Spring Versions 
+> 
+> We'll be using the latest development versions of Spring Experimental stacks as it's continuously fix bugs and 
+> improve performances. However, you have to keep in mind this is still Beta versions and does not represent a final step:
+> - Spring Boot `2.5.0-RC1`
+> - Spring Native `0.10.0-SNAPSHOT`
+
 ## Application Architecture
 
 ![Application Architecture](_img/architecture.jpg)
@@ -87,22 +75,22 @@ The application is composed of 5 microservices :
 The goal of these builds is to produce a Docker image for each microservice. For Java-based ones, there will be two images: 
 one built as ***JVM-based*** image and the other one as ***native*** one.
 
-> info "Optional"
+> Optional
 > 
 > I've pulled this stuf into a public registry on Docker Hub so you don't even need to worry about these builds.
 
 ### Requirements
 
 However, if you wish to **build** the app, you will need to install :
-- [GraalVM Java 8 based](https://www.graalvm.org/docs/getting-started/#install-graalvm)
+- [GraalVM 21.1.0 Java 11 based](https://www.graalvm.org/docs/getting-started/#install-graalvm)
 - [GraalVM Native Images](https://www.graalvm.org/docs/getting-started/#native-images)
 - [Docker](https://www.docker.com/products/docker-desktop)
-    
+
 ### The easy way
 
 It should work on linux and macOS based systems - *and on Windows with some small modifications*
 
-> info "Note"
+> Note
 > 
 > It will take time....... 15-20 min depending on your internet connection and processor! That's the price to compile 
 > to native code.
@@ -134,7 +122,14 @@ mvn spring-boot:build-image
 
 ### Pre-built app 
 
-@TODO Pull from Docker Hub
+You can pull pre-built images from Docker Hub by typing:
+```bash
+docker pull jeanjerome/rng-jvm:1.0.0
+docker pull jeanjerome/hasher-jvm:1.0.0
+docker pull jeanjerome/worker-python:1.0.0
+docker pull jeanjerome/rng-native:1.0.0
+docker pull jeanjerome/hasher-native:1.0.0
+```
 
 ### List local images
 
@@ -145,11 +140,11 @@ docker images
 At least, you should see these images in your local registry:
 ```
 REPOSITORY                TAG        IMAGE ID       CREATED             SIZE
-rng-jvm                   1.0.0      93de422df5d5   58 minutes ago      310MB
-hasher-jvm                1.0.0      d83f93c156de   About an hour ago   310MB
-worker-python             1.0.0      eecd70ae0cf4   5 hours ago         54.7MB
-rng-native                1.0.0      1afb354ae0cb   41 years ago        80.6MB
-hasher-native             1.0.0      c89096e7fb46   41 years ago        80.6MB
+rng-jvm                   1.0.0      f4bfdacdd2a1   4 minutes ago       242MB
+hasher-jvm                1.0.0      ab3600420eab   11 minutes ago      242MB
+worker-python             1.0.0      e2e76d5f8ad4   38 hours ago        55MB
+hasher-native             1.0.0      629bf3cb8760   41 years ago        82.2MB
+rng-native                1.0.0      68e484d391f3   41 years ago        82.2MB
 ```
 
 > info "Note"
@@ -266,11 +261,11 @@ You should see an empty dashboard as follows:
 
 ![Description of the Demo Grafana dashboard](_img/grafana-demo-description.png)
 
-The ***Grafana Demo Dashboard*** is composed of 3 raws (labeled from `A` to `C`), one for each microservice's pods 
+The ***Grafana Demo Dashboard*** is composed of 3 rows (labeled from `A` to `C`), one for each microservice's pods 
 (Worker, Random Number Generator -RNG- and Hasher) and monitored metrics (numbered `1` to `4`).
 
 - In cells #1, `number of running pods` and `process speed` (functionally speaking) are represented.
-- In cells #2, `historical process speed` is first monitored in the A raw. On B and C, `Request Latency` to the underlying 
+- In cells #2, `historical process speed` is first monitored in the A row. On B and C, `Request Latency` to the underlying 
 microservices `RNG` and `Hasher` are displayed.
 - Cells #3 display the `pods' CPU consumption`.
 - Cells #4 monitor the `pods' RAM consumption`.
@@ -303,10 +298,12 @@ service/worker created
 - Visualize the starting app in Grafana:
   ![Grafana dashboard starting app](_img/grafana-demo-starting-app.png)
 
-> ""
-> @TODO Speak about the speed result
+> Results
 > 
-> Depending on your Kubernetes cluster's resources, you could get another result.
+> - The speed metric located in the first cell of the first row give us a base measure of our application effectiveness: 
+> `3.20` cycles/sec.
+> 
+> - Depending on your Kubernetes cluster's resources, you could get another result.
 
 ---
 
@@ -347,49 +344,74 @@ deployment.apps/worker scaled
 
 ![Grafana dashboard 2 workers](_img/grafana-demo-2-workers.png)
 
-You can notice an increase by 2 of the application process.
+> Results
+> 
+> You can notice an increase by 2 of the application process.
 
 ### Increase pods' number even more
 
 - Let's try increasing to 10 workers:
 
 ``` bash
-$ kubectl scale deployment worker --replicas=10 -n demo
+kubectl scale deployment worker --replicas=10 -n demo
 ```
 
 ![Grafana dashboard 10 workers](_img/grafana-demo-10-workers.png)
 
-The process speed grows up but does not reach exactly 10 times more: the 2 others microservices, rng and hasher, simply
-do not follow.
+> Results
+> 
+> The process speed grows up but does not reach exactly 10 times more: latency of the 2 microservices, rng and hasher, 
+> has slightly increases.
 
--  Let's increase `hasher` and `rng`: 
+-  Let's increase `hasher` and `rng` pods' number: 
 
 ``` bash
-$ kubectl scale deployment hasher rng --replicas=4 -n demo
+kubectl scale deployment hasher rng --replicas=4 -n demo
 ```
 ![Grafana dashboard 4 RNGs & Hashers](_img/grafana-demo-4-rng-hasher.png)
 
 Or even more:
 ``` bash
-$ kubectl scale deployment hasher rng --replicas=5 -n demo
+kubectl scale deployment hasher rng --replicas=5 -n demo
 ```
+
+> Results
+> 
+> For this 2 microservices, increasing the pods' number reduces their latency, but its remain a little above their initial values:
+> another factor is influencing the app (?)
 
 ### Switch to native built app
 
-
-- Replace jvm-based images with native ones by updating with Deployment's rollout:
+- Replace jvm-based images with native ones by updating deployments with rollout:
 ```
-$ kubectl set image deployment/hasher hasher=hasher-native:1.0.0 -n demo --record
-$ kubectl set image deployment/rng rng=rng-native:1.0.0 -n demo --record
+kubectl set image deployment/hasher hasher=hasher-native:1.0.0 -n demo
+kubectl set image deployment/rng rng=rng-native:1.0.0 -n demo
 ```
 
 - Watch the deployment rollout:
 ```
-$ kubectl rollout status deployment/hasher -n demo
+kubectl rollout status deployment/hasher -n demo
 ```
+- And the Grafana dashboard:
 
 ![Grafana dashboard native RNGs & Hashers](_img/grafana_demo_native_rng_hasher.png)
 
+> Results
+>
+> About Latency
+> - No change for the responsiveness of the microservices: sure, the code is too simple to benefit from a native build.
+> 
+> About CPU usage
+> - JVM-based CPU usage tends to decrease with time. This is due to the HotSpot's `C2` compiler which produces very
+> optimized native code in the long run.
+> - By contrast, native-based CPU usage is low from the outset.
+> 
+> About RAM usage
+> - Surprisingly Native-based apps are using more memory than JVM-based ones: I can't explain it as reduce footprint of
+> native Java applications is one of the benefits claimed by the community.
+> - Is it because of the Spring Native still in Beta version, or a memory leak in the implementation?
+
+---
 
 ## Stop all
 
@@ -413,14 +435,22 @@ service "worker" deleted
 
 --- 
 
-@TODO: Also limit resources CPU and RAM request
+## What is missing for a more realistic evaluation
 
-> info "Note"
-> 
-> Update replicas automatically with HPA & custom metrics
-> See https://itnext.io/horizontal-pod-autoscale-with-custom-metrics-8cb13e9d475
-
+- Kubernetes' configuration should always include resources limit (and also request) that has not been done in this demo.
+- I could have used [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+  (HPA) and even better HPA on custom metrics (see [this post](https://itnext.io/horizontal-pod-autoscale-with-custom-metrics-8cb13e9d475) 
+  for more details). I wish I found some Automatic Scaler that regulate all pods in an application to maximize a specific 
+  metric but nothing about such a thing... Did you ever hear something like that?
+  
 ---
+
 ## Based on
 
-- Jérôme Patazzoni's `container-training`: [https://github.com/jpetazzo/container.training](https://github.com/jpetazzo/container.training)
+Here are some links for further reading:
+
+- Jérôme Patazzoni's container training: <https://github.com/jpetazzo/container.training>
+- Kubernetes Concepts : <https://kubernetes.io/docs/concepts/>
+- Monitoring your apps in Kubernetes with Prometheus and Spring Boot: <https://developer.ibm.com/technologies/containers/tutorials/monitoring-kubernetes-prometheus/>
+- Prometheus Python Client: <https://github.com/prometheus/client_python>
+- Custom Prometheus Metrics for Apps Running in Kubernetes: <https://zhimin-wen.medium.com/custom-prometheus-metrics-for-apps-running-in-kubernetes-498d69ada7aa>
