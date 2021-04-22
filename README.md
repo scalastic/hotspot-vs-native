@@ -53,23 +53,16 @@ Well it's not a big deal and this already exists:
 
 ## Application Architecture
 
-![Application Architecture](_img/architecture.jpg)
+![Application Architecture](_img/application-architecture.jpg)
 
 The application is composed of 5 microservices :
-- `worker` the algorithm orchestrator [`Python`] which gets a random number, hash it, and increment a counter in redis database.
+- `worker` the algorithm orchestrator [`Python`] which gets `1` a random number, `2` hash it, and `3` increment a counter in redis database.
 - `rng` the random number generator [`Spring Boot`]
 - `hasher` the hasher processor [`Spring Boot`]
 - `redis` the database recording each complete execution cycle
-- ~~webui the web interface where number of complete cycles is rendered~~
 
 ---
 
-- @TODO:
-  - A kubernetes environment
-  - If you only want to ***run*** the app, you'd just need [Docker](https://www.docker.com/products/docker-desktop) as 
-    images were pulled on Docker Hub and are publicly accessible.
-
----
 ## Build the app
 
 The goal of these builds is to produce a Docker image for each microservice. For Java-based ones, there will be two images: 
@@ -147,7 +140,7 @@ hasher-native             1.0.0      629bf3cb8760   41 years ago        82.2MB
 rng-native                1.0.0      68e484d391f3   41 years ago        82.2MB
 ```
 
-> info "Note"
+> Note
 > 
 > Native images created time seems inaccurate. It's not, the explanation is here: 
 > [Time Travel with Pack](https://medium.com/buildpacks/time-travel-with-pack-e0efd8bf05db)
@@ -161,8 +154,11 @@ First, we need to define the kubernetes configuration of our application and con
 
 Let's have a look at how to set up these microservices into our kubernetes cluster.
 
-Remember the microservices architecture :
-![Microservices Architecture](_img/architecture.jpg)
+Remember the application architecture :
+- It will be deployed in a dedicated namespace `demo`
+- Monitoring tool are located in the `monitoring` namespace
+
+![Kubernetes Architecture](_img/kubernetes-architecture.jpg)
 
 1. We want to manage the number of ~~containers~~ - pods in this case -  per microservice . We could want to 
    scale up automatically this number depending on metrics. We also would like to change the image of the pod, passing 
@@ -248,8 +244,8 @@ spec:
 
 ## Configure Grafana dashboard
 
-- Connect to your Grafana interface
-  - if you've followed my previous article [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/) you can reach Grafana at [http://localhost:3000/](http://localhost:3000/)
+- Connect to your Grafana interface 
+  > If you've followed my previous article [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/) you can reach Grafana at [http://localhost:3000/](http://localhost:3000/)
 - Import the dashboard from the JSON definition `_grafana/demo-dashboard.json` from this repo
 - Display the dashboard
 

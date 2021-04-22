@@ -10,15 +10,6 @@ printf "=== ️Building Docker Images of %s Apps 🚀 ===\n\n" "${PWD##*/}"
 
 ./_tools/_check_requirements.sh
 
-## WebUI app
-cd webui
-printf "** Start building %s app 🔨 ...\n\n" "${PWD##*/}"
-
-docker build -t webui-js:1.0.0 -q .
-
-echo "Done ✅"
-cd ..
-
 ## Worker app
 cd worker
 printf "** Start building %s app 🔨 ...\n\n" "${PWD##*/}"
