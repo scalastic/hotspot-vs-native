@@ -1,4 +1,46 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "7.5.4"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -15,7 +57,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
+  "id": null,
   "links": [],
   "panels": [
     {
@@ -41,7 +83,7 @@
       "type": "row"
     },
     {
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -49,6 +91,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -109,7 +152,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Num. Pods",
+      "title": "Nb. Pods",
       "type": "stat"
     },
     {
@@ -117,7 +160,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -146,7 +189,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": true
       },
@@ -182,7 +225,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Speed",
+      "title": "Functional Speed",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -199,11 +242,12 @@
       "yaxes": [
         {
           "$$hashKey": "object:166",
+          "decimals": 2,
           "format": "none",
-          "label": null,
+          "label": "Cycles/s",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -226,7 +270,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -255,7 +299,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": true
       },
@@ -310,7 +354,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -333,7 +377,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -362,7 +406,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": true
       },
@@ -428,7 +472,7 @@
           "label": "",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
@@ -438,7 +482,7 @@
       }
     },
     {
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -540,7 +584,7 @@
       "type": "row"
     },
     {
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -548,6 +592,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -601,7 +646,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Num. Pods",
+      "title": "Nb. Pods",
       "type": "stat"
     },
     {
@@ -609,7 +654,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -626,7 +671,7 @@
         "y": 10
       },
       "hiddenSeries": false,
-      "id": 17,
+      "id": 23,
       "legend": {
         "avg": false,
         "current": false,
@@ -638,7 +683,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": true
       },
@@ -649,12 +694,12 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
           "exemplar": true,
-          "expr": "irate(rng_requests_number{app=\"worker\"}[1m])",
+          "expr": "rate(hasher_request_processing_seconds_sum[1m]) / rate(hasher_request_processing_seconds_count[1m])",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -667,7 +712,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Speed",
+      "title": "Request Latency",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -684,11 +729,12 @@
       "yaxes": [
         {
           "$$hashKey": "object:166",
+          "decimals": null,
           "format": "none",
-          "label": null,
+          "label": "sec/call",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -711,7 +757,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -740,7 +786,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": true
       },
@@ -788,7 +834,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -811,7 +857,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -840,7 +886,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": false
       },
@@ -890,7 +936,7 @@
           "label": "Mo",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -909,7 +955,7 @@
       }
     },
     {
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -1003,7 +1049,7 @@
       "type": "row"
     },
     {
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -1011,6 +1057,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1064,7 +1111,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Num. Pods",
+      "title": "Nb. Pods",
       "type": "stat"
     },
     {
@@ -1072,7 +1119,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -1101,7 +1148,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": true
       },
@@ -1112,17 +1159,15 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
           "exemplar": true,
-          "expr": "irate(hasher_requests_number{app=\"worker\"}[1m])",
-          "format": "time_series",
-          "instant": false,
+          "expr": "rate(rng_request_processing_seconds_sum[1m]) / rate(rng_request_processing_seconds_count[1m])",
+          "hide": false,
           "interval": "",
           "legendFormat": "{{instance}}",
-          "queryType": "randomWalk",
           "refId": "A"
         }
       ],
@@ -1130,7 +1175,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Speed",
+      "title": "Request Latency",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1148,10 +1193,10 @@
         {
           "$$hashKey": "object:166",
           "format": "none",
-          "label": null,
+          "label": "sec/call",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -1174,7 +1219,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -1203,7 +1248,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": true
       },
@@ -1222,7 +1267,7 @@
           "expr": "rate(container_cpu_usage_seconds_total{image!=\"\", namespace=\"demo\", container=\"hasher\"}[1m])",
           "hide": false,
           "interval": "",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{pod}}",
           "refId": "A"
         }
       ],
@@ -1251,7 +1296,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -1274,7 +1319,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -1303,7 +1348,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "options": {
         "alertThreshold": false
       },
@@ -1353,7 +1398,7 @@
           "label": "Mo",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -1372,7 +1417,7 @@
       }
     },
     {
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -1467,5 +1512,5 @@
   "timezone": "",
   "title": "Demo Dashboard",
   "uid": "W7qLsQXGz",
-  "version": 17
+  "version": 25
 }

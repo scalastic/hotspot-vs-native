@@ -4,10 +4,10 @@
 > WORK IN PROGRESS
 > 
 > @TODO
-> - Docker compose is not necessary
-> - Script Native build
-> - Deploy on K8S
-> - Implement and test monitoring tool on native apps : target micrometer/prometheus
+> - ~~Docker compose is not necessary~~
+> - ~~Script Native build~~
+> - ~~Deploy on K8S~~
+> - ~~Implement and test monitoring tool on native apps : target micrometer/prometheus~~
 
 > Performances Comparison Scenario
 > 0. Build jvm-based and Native-based images
@@ -22,40 +22,59 @@
 ---
 ## Introduction
 When it comes to comparing JVM-HotSpot and GraalVM-native executions, 
-it is often hard to decide on application's architecture and technology to test and even what to mesure.
+it is often hard to decide on application's architecture and technology to test and even what to measure.
 
 Recently I came across an interesting training course about [containers and orchestration](https://github.com/jpetazzo/container.training) 
 written by Jérôme Petazzoni. He uses a bunch of interacting Python and Ruby apps encapsulated in Docker containers. They act as 
-a microservices mesh and measuring the number of completed cycles per elapsed time provides a good estimation of the 
-system effectiveness. Being able to play with the number of running containers is also a good illustration of what 
+a microservices mesh and measuring the number of completed cycles per second provides a good estimation of the 
+system effectiveness. Being able to play with the number of running containers would be also a good illustration of what 
 actually happens.
 
-I therefore decided to port 2 of its microservices `Python` and `Ruby` coded
-into more realistic ones in enterprise ecosystem (and also more JVM-friendly): `Spring Boot` 
-and reactive `WebFlux`.
-
-Compiling these apps into JVM-based or Native images would make a good case study for this purpose.
+I therefore decided to port his demonstration application into Java using `Spring Boot` and reactive programming `WebFlux`.
 
 ---
-## Microservices Architecture
 
-![Microservices Architecture](_img/architecture.jpg)
+## Demonstration
 
-The resulting microservices system is composed of 5 containers :
-- `worker`: the algorithm orchestrator [`Python`]
-- `rng`: the random number generator [`Spring Boot`]
-- `hasher`: the hasher processor [`Spring Boot`]
-- `redis`: the database recording each complete execution cycle
-- `webui`: the web interface where number of complete cycles is rendered [`JavaScript`]
+### Objective
+
+The main goal of this demo is to tweak the microservices' resources configuration and see how it affects the global
+application's performance.
+
+What are our levers for action?
+- First, we could easily play with the **number of containers** running each
+  microservice.
+- Secondly, Java-based microservices are built on two types which can be easily switched: **JVM-based** or **Native**.
+
+So let's do it.
+
+### Requirements
+
+In order to implement this solution, we'll need:
+- A **Kubernetes** cluster
+- **Prometheus**, **Grafana**
+- **Metrics** coming from our microservices
+- **Bytecode** and **native** built Java apps
+
+Well it's not a big deal and this already exists:
+
+- ***Spring Boot*** and ***Micrometer*** enable metrics exposure of Java applications
+- Python code is instrumented with ***prometheus_client*** library which also exposed metrics to prometheus
+- I explained and scripted a complete Kubernetes stack installation in a previous article: [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/)
+- ***Spring Boot Native*** can build natively or in Bytecode any Java app
+
+## Application Architecture
+
+![Application Architecture](_img/architecture.jpg)
+
+The application is composed of 5 microservices :
+- `worker` the algorithm orchestrator [`Python`] which gets a random number, hash it, and increment a counter in redis database.
+- `rng` the random number generator [`Spring Boot`]
+- `hasher` the hasher processor [`Spring Boot`]
+- `redis` the database recording each complete execution cycle
+- ~~webui the web interface where number of complete cycles is rendered~~
 
 ---
-## Requirements
-
-- In order to ***build*** the app, you'll need to install :
-    - [GraalVM Java 8 based](https://www.graalvm.org/docs/getting-started/#install-graalvm)
-    - [GraalVM Native Images](https://www.graalvm.org/docs/getting-started/#native-images)
-    - [Docker](https://www.docker.com/products/docker-desktop)
-    - [Maven](https://maven.apache.org) (but this is optional as you may use the Maven Wrapper provided with the project)
 
 - @TODO:
   - A kubernetes environment
@@ -63,11 +82,22 @@ The resulting microservices system is composed of 5 containers :
     images were pulled on Docker Hub and are publicly accessible.
 
 ---
-## How-to build
+## Build the app
 
-The goal of these builds is to produce Docker images, one per microservice. However, the Java-based ones will be build 
-twice, the first, as a ***JVM-based*** image and the second, as a ***native*** one.
+The goal of these builds is to produce a Docker image for each microservice. For Java-based ones, there will be two images: 
+one built as ***JVM-based*** image and the other one as ***native*** one.
 
+> info "Optional"
+> 
+> I've pulled this stuf into a public registry on Docker Hub so you don't even need to worry about these builds.
+
+### Requirements
+
+However, if you wish to **build** the app, you will need to install :
+- [GraalVM Java 8 based](https://www.graalvm.org/docs/getting-started/#install-graalvm)
+- [GraalVM Native Images](https://www.graalvm.org/docs/getting-started/#native-images)
+- [Docker](https://www.docker.com/products/docker-desktop)
+    
 ### The easy way
 
 It should work on linux and macOS based systems - *and on Windows with some small modifications*
@@ -102,64 +132,37 @@ cd <app_dir>
 mvn spring-boot:build-image
 ```
 
-### Expected result
+### Pre-built app 
 
-At least, you should now see your images in your local registry:
+@TODO Pull from Docker Hub
+
+### List local images
+
+To list your local docker images, enter:
 ``` bash
-$ docker images
+docker images
+```
+At least, you should see these images in your local registry:
+```
 REPOSITORY                TAG        IMAGE ID       CREATED             SIZE
 rng-jvm                   1.0.0      93de422df5d5   58 minutes ago      310MB
 hasher-jvm                1.0.0      d83f93c156de   About an hour ago   310MB
 worker-python             1.0.0      eecd70ae0cf4   5 hours ago         54.7MB
-webui-js                  1.0.0      0216a3b68548   2 days ago          219MB
-paketobuildpacks/builder  tiny       3d35e291e768   41 years ago        409MB
 rng-native                1.0.0      1afb354ae0cb   41 years ago        80.6MB
 hasher-native             1.0.0      c89096e7fb46   41 years ago        80.6MB
 ```
 
-> info "Note #1"
-> 
-> Images whose name starts with `paketobuildpacks` comes from [Buildpacks](https://buildpacks.io) 
-> and are used for building native parts
-
-> info "Note #2"
+> info "Note"
 > 
 > Native images created time seems inaccurate. It's not, the explanation is here: 
 > [Time Travel with Pack](https://medium.com/buildpacks/time-travel-with-pack-e0efd8bf05db)
 
-### The other other-way
-
-I've pulled this stuf into a public registry on Docker Hub so you don't even need to worry about these builds.
-
 ---
-## Demo time
+## Configure Kubernetes
 
-### Objectives
+First, we need to define the kubernetes configuration of our application and configure Grafana to monitor accurate metrics.
 
-The main goal of this demo is to tweak the microservices' resources configuration and see how it affects the global 
-application's performance. 
-
-What are our levers for action? 
-- Because this application is microservices-based, we could easily play with the **number of containers** running each 
-  microservice.
-- For two of this microservices (*the Java ones*), there are two types of build we could switch: **JVM-based** or **Native**.
-
-Good! Let's do it.
-
-### Requirements
-For that, we need a ***Kubernetes cluster***... and ***Prometheus***, ***Grafana***... and **metrics** coming from our
-microservices to monitor the app...
-
-Well, no problem:
-- Thanks to ***Spring Boot*** and ***Micrometer***, the Java applications (JVM and native-based) already expose metrics to Prometheus.
-- For a complete Kubernetes stack, you can follow this previous article with all explained and scripted: [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/) 
-
----
-## First start
-
-First, we need to define the kubernetes configuration of our application.
-
-### Configure Kubernetes
+### Kubernetes Stack Architecture
 
 Let's have a look at how to set up these microservices into our kubernetes cluster.
 
@@ -248,98 +251,167 @@ spec:
 
 </details>
 
+## Configure Grafana dashboard
 
-#### Start the app
+- Connect to your Grafana interface
+  - if you've followed my previous article [Locally install Kubernetes, Prometheus, and Grafana](https://scalastic.io/install-kubernetes/) you can reach Grafana at [http://localhost:3000/](http://localhost:3000/)
+- Import the dashboard from the JSON definition `_grafana/demo-dashboard.json` from this repo
+- Display the dashboard
 
-In the first place, all microservices' replicas are configured with 1 pod, and the Java-based microservices run on JVM.
+You should see an empty dashboard as follows:
+![Empty Demo Grafana dashboard](_img/grafana-demo-empty.png)
 
-- To start all microservices, apply this configuration to our cluster:
+
+### Description of the ***Demo Dashboard***
+
+![Description of the Demo Grafana dashboard](_img/grafana-demo-description.png)
+
+The ***Grafana Demo Dashboard*** is composed of 3 raws (labeled from `A` to `C`), one for each microservice's pods 
+(Worker, Random Number Generator -RNG- and Hasher) and monitored metrics (numbered `1` to `4`).
+
+- In cells #1, `number of running pods` and `process speed` (functionally speaking) are represented.
+- In cells #2, `historical process speed` is first monitored in the A raw. On B and C, `Request Latency` to the underlying 
+microservices `RNG` and `Hasher` are displayed.
+- Cells #3 display the `pods' CPU consumption`.
+- Cells #4 monitor the `pods' RAM consumption`.
+
+---
+
+## Start the app
+
+In this first step, all microservices' replicas are configured with 1 pod, and the Java-based microservices run on JVM.
+All of this will also be created in a specific `demo` namespace.
+
+- To start app's microservices, apply this configuration to the cluster:
 ``` bash
 kubectl apply -f _kube/k8s-app-jvm.yml
 ```
 
-- Connect to the Web UI interface:
-  
-But, hey, we don't know its address! That's right but we could guess what it is...
-    
-1. It is exposed as a NodePort in the `demo` namespace
-1. We only defined one NodePort in this namespace
-1. Our local kubernetes cluster is accessible via `localhost`
-
-Let's run a query to build this URL:
-``` bash
-kubectl get service -n demo -o go-template='{{range .items}}{{range.spec.ports}}{{if .nodePort}}http://localhost:{{.nodePort}}{{"\n"}}{{end}}{{end}}{{end}}'
+You should see the output:
+```
+namespace/demo created
+deployment.apps/hasher created
+service/hasher created
+deployment.apps/rng created
+service/rng created
+deployment.apps/redis created
+service/redis created
+deployment.apps/worker created
+service/worker created
 ```
 
-I get :
-``` bash
-$ kubectl get service -n demo -o go-template='{{range .items}}{{range.spec.ports}}{{if .nodePort}}http://localhost:{{.nodePort}}{{"\n"}}{{end}}{{end}}{{end}}'
-http://localhost:31698
-```
+- Visualize the starting app in Grafana:
+  ![Grafana dashboard starting app](_img/grafana-demo-starting-app.png)
 
-Bingo! Enter ***THE_ONE_YOU_FOUND!!*** in a browser and you should see:
-
-![The Web UI interface at startup](_img/jvm-with-1-worker.png)
-
-> info "Note"
+> ""
+> @TODO Speak about the speed result
 > 
-> If the graph is still empty, that should be your microservices that are not all deployed and ready: wait...
+> Depending on your Kubernetes cluster's resources, you could get another result.
 
 ---
 
-## Play with pods' number
+## Play with k8s config
 
-1. Update number with command line
+### Overview
 
-- Find deployments we want to scale:
+- Let's see the actual deployment's situation by entering:
 ``` bash
-$ kubectl get deployment -n demo
+kubectl get deployment -n demo
+```
 
+- Which should return:
+```
 NAME     READY   UP-TO-DATE   AVAILABLE   AGE
 hasher   1/1     1            1           13m
 redis    1/1     1            1           13m
 rng      1/1     1            1           13m
-webui    1/1     1            1           13m
 worker   1/1     1            1           13m
 ```
 
-- Try scaling `worker`: 
+### Increase pods' number
+
+- Scale up `worker` pod to 2: 
 
 ``` bash
-$ kubectl scale deployment worker --replicas=2 -n demo
+kubectl scale deployment worker --replicas=2 -n demo
+```
 
+Which returns:
+```
 deployment.apps/worker scaled
 ```
 
-You notice an increase in 2 times for the hashes process on the graph too.
+### Impact on application
 
-- Let's try increasing to 10 workers then:
+- Let's have a look on Grafana dashboard:
+
+![Grafana dashboard 2 workers](_img/grafana-demo-2-workers.png)
+
+You can notice an increase by 2 of the application process.
+
+### Increase pods' number even more
+
+- Let's try increasing to 10 workers:
 
 ``` bash
 $ kubectl scale deployment worker --replicas=10 -n demo
 ```
 
-![The Web UI interface at startup](_img/jvm-with-10-worker.png)
+![Grafana dashboard 10 workers](_img/grafana-demo-10-workers.png)
 
-The process grows up but does not reach 10 times: the others microservices simply do not follow.
+The process speed grows up but does not reach exactly 10 times more: the 2 others microservices, rng and hasher, simply
+do not follow.
 
 -  Let's increase `hasher` and `rng`: 
 
 ``` bash
-$ kubectl scale deployment hasher rng --replicas=2 -n demo
+$ kubectl scale deployment hasher rng --replicas=4 -n demo
+```
+![Grafana dashboard 4 RNGs & Hashers](_img/grafana-demo-4-rng-hasher.png)
+
+Or even more:
+``` bash
+$ kubectl scale deployment hasher rng --replicas=5 -n demo
 ```
 
-- Replace jvm-based images with native ones:
+### Switch to native built app
+
+
+- Replace jvm-based images with native ones by updating with Deployment's rollout:
 ```
-$ kubectl set image deployment/hasher hasher-native:1.0.0 --record
+$ kubectl set image deployment/hasher hasher=hasher-native:1.0.0 -n demo --record
+$ kubectl set image deployment/rng rng=rng-native:1.0.0 -n demo --record
 ```
 
 - Watch the deployment rollout:
 ```
-$ kubectl rollout status deployment/hasher
+$ kubectl rollout status deployment/hasher -n demo
 ```
-    
-@TODO: need grafana visualization of hasher and rng rate calls to explain what's happen
+
+![Grafana dashboard native RNGs & Hashers](_img/grafana_demo_native_rng_hasher.png)
+
+
+## Stop all
+
+To simply stop the app and all its microservices, enter:
+```
+kubectl delete -f _kube/k8s-app-jvm.yml 
+```
+which will remove all the Kubernetes configuration created previously:
+
+```
+namespace "demo" deleted
+deployment.apps "hasher" deleted
+service "hasher" deleted
+deployment.apps "rng" deleted
+service "rng" deleted
+deployment.apps "redis" deleted
+service "redis" deleted
+deployment.apps "worker" deleted
+service "worker" deleted
+```
+
+--- 
 
 @TODO: Also limit resources CPU and RAM request
 
@@ -347,14 +419,6 @@ $ kubectl rollout status deployment/hasher
 > 
 > Update replicas automatically with HPA & custom metrics
 > See https://itnext.io/horizontal-pod-autoscale-with-custom-metrics-8cb13e9d475
-
----
-
-## Play with images
-
-@TODO https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment
-
-
 
 ---
 ## Based on
