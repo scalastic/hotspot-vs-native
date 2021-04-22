@@ -20,10 +20,10 @@ fi
 
 if [[ "$_java" ]]; then
     version=$("$_java" -version 2>&1 | head -1 | cut -d'"' -f2 | sed '/^1\./s///' | cut -d'.' -f1)
-    if [[ "$version" == "8" ]]; then
+    if [[ "$version" == "11" ]]; then
         printf "Found Java version ${version} ✅\n"
     else
-        printf "${RED}FAILURE${NC}: Found Java version ${version} but should be 8! 🔥\n"
+        printf "${RED}FAILURE${NC}: Found Java version ${version} but should be 11! 🔥\n"
         exit 1;
     fi
 fi
