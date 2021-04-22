@@ -2,6 +2,7 @@ package io.scalastic.jvmvsnative.rng;
 
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.stream.Collectors;
 
@@ -21,11 +22,16 @@ public class RNGService {
     }
   
     String chars = "0123456789";
-    String str = new SecureRandom()
-        .ints(digits, 0, chars.length())
-        .mapToObj(i -> "" + chars.charAt(i))
-        .collect(Collectors.joining());
-    
+    String str = null;
+    try {
+      str = SecureRandom.getInstance("NativePRNGNonBlocking")
+          .ints(digits, 0, chars.length())
+          .mapToObj(i -> "" + chars.charAt(i))
+          .collect(Collectors.joining());
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    }
+  
     return str;
   }
   
