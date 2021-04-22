@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: rng
+management:
+  security:
+    enabled: 'false'
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}

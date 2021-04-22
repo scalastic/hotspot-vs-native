@@ -1,0 +1,204 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+spec:
+  finalizers:
+    - kubernetes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hasher
+  namespace: demo
+  labels:
+    app: hasher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hasher
+  template:
+    metadata:
+      name: hasher
+      labels:
+        app: hasher
+    spec:
+      containers:
+        - image: hasher-jvm:1.0.0
+          imagePullPolicy: IfNotPresent
+          name: hasher
+          ports:
+            - containerPort: 8080
+              name: http-hasher
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hasher
+  namespace: demo
+  labels:
+    app: hasher
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/scheme: http
+    prometheus.io/path: /actuator/prometheus
+    prometheus.io/port: '8080'
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: http-hasher
+  selector:
+    app: hasher
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rng
+  namespace: demo
+  labels:
+    app: rng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rng
+  template:
+    metadata:
+      name: rng
+      labels:
+        app: rng
+    spec:
+      containers:
+        - image: rng-jvm:1.0.0
+          imagePullPolicy: IfNotPresent
+          name: rng
+          ports:
+            - containerPort: 8080
+              name: http-rng
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rng
+  namespace: demo
+  labels:
+    app: rng
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/scheme: http
+    prometheus.io/path: /actuator/prometheus
+    prometheus.io/port: '8080'
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: http-rng
+  selector:
+    app: rng
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: demo
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - image: redis:6.2.1
+          name: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: demo
+  labels:
+    app: redis
+spec:
+  ports:
+    - port: 6379
+      protocol: TCP
+      targetPort: 6379
+  selector:
+    app: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: worker
+  name: worker
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      name: worker
+      labels:
+        app: worker
+    spec:
+      containers:
+        - image: worker-python:1.0.0
+          imagePullPolicy: IfNotPresent
+          name: worker
+          ports:
+            - containerPort: 8080
+              name: http-worker
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker
+  namespace: demo
+  labels:
+    app: worker
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/scheme: http
+    prometheus.io/path: /
+    prometheus.io/port: '8080'
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: http-worker
+  selector:
+    app: worker
